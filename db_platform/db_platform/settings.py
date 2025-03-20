@@ -33,6 +33,8 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    #'colorfield',
+    #'admin_interface',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -100,6 +102,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 CORS_ALLOW_ALL_ORIGINS = True  # À désactiver en production
+X_FRAME_OPTIONS = 'SAMEORIGIN'  # Nécessaire pour django-admin-interface
 
 # Configuration de SimpleJWT (facultatif, valeurs par défaut)
 from datetime import timedelta
