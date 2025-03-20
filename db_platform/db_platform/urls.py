@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -20,8 +21,12 @@ from core.views import (
     #class_average,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+def home(request):
+    return HttpResponse("Backend is running! Access APIs at /api/ or admin at /admin/.")
+
 
 urlpatterns = [
+    path('', home, name='home'),  # Route pour la racine
     path('admin/', admin.site.urls),
     path('api/exercises/', ExerciseList.as_view(), name='exercise-list'),
     path('api/exercises/add/', ExerciseCreate.as_view(), name='exercise-create'),
