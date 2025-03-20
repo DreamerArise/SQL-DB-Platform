@@ -26,3 +26,5 @@ cryptography==43.0.1
 
 # Serveur WSGI pour production
 gunicorn==23.0.0
+
+djangorestframework-simplejwt==5.3.1
