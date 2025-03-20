@@ -100,6 +100,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://sql-db-frontend.onrender.com",
 ]
 CORS_ALLOW_ALL_ORIGINS = True  # À désactiver en production
 X_FRAME_OPTIONS = 'SAMEORIGIN'  # Nécessaire pour django-admin-interface
