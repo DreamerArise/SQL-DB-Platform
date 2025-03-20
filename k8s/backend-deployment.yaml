@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appsgbd-backend
+  namespace: default
+spec:
+  replicas: 2 # Scalabilité : 2 pods pour commencer
+  selector:
+    matchLabels:
+      app: appsgbd-backend
+  template:
+    metadata:
+      labels:
+        app: appsgbd-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/ton-username/appsgbd-backend:latest # Remplace par ton image
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DEBUG
+              value: "True"
+            - name: SECRET_KEY
+              value: "your-secret-key"
+            - name: DATABASE_URL
+              value: "sqlite:///db.sqlite3"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appsgbd-backend-service
+  namespace: default
+spec:
+  selector:
+    app: appsgbd-backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP

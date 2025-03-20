@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./db_platform
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./db_platform:/app
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=your-secret-key
+      - DATABASE_URL=sqlite:///db.sqlite3
+    depends_on:
+      - ollama
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    command: ollama run deepseek-coder
+
+volumes:
+  ollama-data:
