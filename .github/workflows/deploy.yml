@@ -1,0 +1,71 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout du code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Connexion à GitHub Container Registry
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.DOCKERHUB_TOKEN_KEY }}
+
+    # Build et push de l'image backend
+    - name: Build and push backend image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./db_platform
+        push: true
+        tags: ghcr.io/${{ github.actor }}/appsgbd-backend:${{ github.sha }}
+
+    # Build et push de l'image frontend
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./frontend
+        push: true
+        tags: ghcr.io/${{ github.actor }}/appsgbd-frontend:${{ github.sha }}
+
+    # Configurer kubectl
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+
+    # Configurer le contexte Kubernetes
+    - name: Set Kubernetes context
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+        export KUBECONFIG=kubeconfig
+        kubectl config use-context minikube  # Remplace par le contexte de ton cluster
+
+    # Mettre à jour les manifests avec la nouvelle image
+    - name: Update image tags in manifests
+      run: |
+        sed -i "s|ghcr.io/ton-username/appsgbd-backend:.*|ghcr.io/${{ github.actor }}/appsgbd-backend:${{ github.sha }}|" k8s/backend-deployment.yaml
+        sed -i "s|ghcr.io/ton-username/appsgbd-frontend:.*|ghcr.io/${{ github.actor }}/appsgbd-frontend:${{ github.sha }}|" k8s/frontend-deployment.yaml
+
+    # Déployer sur Kubernetes
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/ollama-deployment.yaml
+        kubectl apply -f k8s/backend-deployment.yaml
+        kubectl apply -f k8s/frontend-deployment.yaml
+        kubectl apply -f k8s/ingress.yaml
+
+    # Vérifier le déploiement
+    - name: Verify deployment
+      run: |
+        kubectl rollout status deployment/appsgbd-backend
+        kubectl rollout status deployment/appsgbd-frontend
+        kubectl rollout status deployment/ollama
